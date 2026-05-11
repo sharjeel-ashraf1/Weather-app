@@ -1,98 +1,127 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView,
+  StyleSheet, Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function App() {
+  const [city, setCity] = useState('');
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-export default function HomeScreen() {
+  const fetchWeather = async () => {
+    if (!city.trim()) return;
+    setLoading(true);
+    setError('');
+    setWeather(null);
+    try {
+      const res = await fetch(
+        `https://wttr.in/${encodeURIComponent(city)}?format=j1`
+      );
+      const data = await res.json();
+      console.log('DATA:', JSON.stringify(data).slice(0, 200));
+      setWeather(data);
+    } catch (e) {
+      console.log('ERROR:', e);
+      setError('City not found. Try again!');
+    }
+    setLoading(false);
+  };
+
+  const getEmoji = (code) => {
+    code = parseInt(code);
+    if (code === 113) return '☀️';
+    if (code === 116) return '⛅';
+    if ([119, 122].includes(code)) return '☁️';
+    if ([143, 248, 260].includes(code)) return '🌫️';
+    if ([176, 263, 266, 293, 296].includes(code)) return '🌦️';
+    if ([299, 302, 305, 308].includes(code)) return '🌧️';
+    if ([200, 386, 389].includes(code)) return '⛈️';
+    if ([179, 227, 230, 329, 332].includes(code)) return '❄️';
+    return '🌡️';
+  };
+
+  const current = weather?.current_condition?.[0];
+  const area = weather?.nearest_area?.[0];
+  const cityName = area?.areaName?.[0]?.value || city;
+  const country = area?.country?.[0]?.value || '';
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView contentContainerStyle={styles.inner}>
+        <Text style={styles.title}>🌤️ WeatherApp</Text>
+        <Text style={styles.subtitle}>Search any city in the world</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter city name..."
+            placeholderTextColor="#aaa"
+            value={city}
+            onChangeText={setCity}
+            onSubmitEditing={fetchWeather}
+          />
+          <TouchableOpacity style={styles.button} onPress={fetchWeather}>
+            <Text style={styles.buttonText}>Search</Text>
+          </TouchableOpacity>
+        </View>
+
+        {loading && <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 40 }} />}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        {current && (
+          <View style={styles.card}>
+            <Text style={styles.emoji}>{getEmoji(current.weatherCode)}</Text>
+            <Text style={styles.cityName}>{cityName}, {country}</Text>
+            <Text style={styles.temp}>{current.temp_C}°C</Text>
+            <Text style={styles.description}>{current.weatherDesc?.[0]?.value}</Text>
+
+            <View style={styles.divider} />
+
+            <View style={styles.detailsRow}>
+              <View style={styles.detailBox}>
+                <Text style={styles.detailLabel}>Feels Like</Text>
+                <Text style={styles.detailValue}>{current.FeelsLikeC}°C</Text>
+              </View>
+              <View style={styles.detailBox}>
+                <Text style={styles.detailLabel}>Humidity</Text>
+                <Text style={styles.detailValue}>{current.humidity}%</Text>
+              </View>
+              <View style={styles.detailBox}>
+                <Text style={styles.detailLabel}>Wind</Text>
+                <Text style={styles.detailValue}>{current.windspeedKmph} km/h</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container: { flex: 1, backgroundColor: '#0F1B2D' },
+  inner: { flexGrow: 1, alignItems: 'center', paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 },
+  title: { fontSize: 32, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
+  subtitle: { fontSize: 14, color: '#aaa', marginBottom: 30 },
+  inputRow: { flexDirection: 'row', width: '100%', marginBottom: 30 },
+  input: { flex: 1, backgroundColor: '#1E2D40', color: '#fff', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, marginRight: 10 },
+  button: { backgroundColor: '#4A90E2', borderRadius: 12, paddingHorizontal: 20, justifyContent: 'center' },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  error: { color: '#FF6B6B', fontSize: 15, marginTop: 20 },
+  card: { width: '100%', backgroundColor: '#1E2D40', borderRadius: 20, padding: 28, alignItems: 'center', marginTop: 10 },
+  emoji: { fontSize: 64, marginBottom: 10 },
+  cityName: { fontSize: 22, fontWeight: 'bold', color: '#fff', marginBottom: 6 },
+  temp: { fontSize: 56, fontWeight: 'bold', color: '#4A90E2', marginBottom: 4 },
+  description: { fontSize: 16, color: '#aaa', textTransform: 'capitalize', marginBottom: 20 },
+  divider: { width: '100%', height: 1, backgroundColor: '#2E4057', marginBottom: 20 },
+  detailsRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+  detailBox: { alignItems: 'center', flex: 1 },
+  detailLabel: { fontSize: 12, color: '#aaa', marginBottom: 4 },
+  detailValue: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
 });
