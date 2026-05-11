@@ -1,50 +1,32 @@
-# Welcome to your Expo app 👋
+# 🌤️ Weather App — React Native
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A clean, mobile weather app built with React Native and Expo. Search any city in the world and get live weather data instantly.
 
-## Get started
+## 📱 Features
 
-1. Install dependencies
+- Search weather by city name
+- Displays temperature, feels like, humidity, and wind speed
+- Dynamic weather emojis based on conditions
+- Clean dark UI optimized for mobile
 
-   ```bash
-   npm install
-   ```
+## 🛠️ Built With
 
-2. Start the app
+- React Native
+- Expo
+- wttr.in API (no API key required)
+- JavaScript (ES6+)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## 🚀 Run Locally
 
 ```bash
-npm run reset-project
+git clone https://github.com/sharjeel-ashraf1/Weather-app.git
+cd Weather-app
+npm install
+npx expo start --tunnel
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Then scan the QR code with Expo Go (Android) or Camera app (iOS).
 
-## Learn more
+## 👨‍💻 Author
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Raja Sharjeel Ashraf — 6th Semester CS Student at FAST-NUCES
